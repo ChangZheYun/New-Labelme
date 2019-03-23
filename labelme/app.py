@@ -1352,6 +1352,10 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 self._saveFile(self.saveFileDialog())
                 
+                ### go to correct address ###
+                os.chdir(self.currentPath())
+                ###
+                
                 ### execute json_to_dataset ###
                 json_name=self.json_name.split("/")
                 command="labelme_json_to_dataset "+json_name[len(json_name)-1]
