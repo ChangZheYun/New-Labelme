@@ -72,7 +72,7 @@ def shapes_to_label(out_dir, img_shape, shapes, label_name_to_value, type='class
         mask = shape_to_mask(img_shape[:2], points, shape_type)
         
         ###new code###
-        name="mask-"+str(cls_id)+'.png'
+        name=cls_name+'.png'
         mask_path=os.path.join(out_dir,name)
         new_mask=np.array(mask,dtype=np.int32)
         for i in range(len(new_mask)):
