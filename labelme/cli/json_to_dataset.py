@@ -12,11 +12,9 @@ from labelme import utils
 
 
 def main():
-# =============================================================================
-#     logger.warning('This script is aimed to demonstrate how to convert the'
-#                    'JSON file to a single image dataset, and not to handle'
-#                    'multiple JSON files to generate a real-use dataset.')
-# =============================================================================
+    logger.warning('This script is aimed to demonstrate how to convert the'
+                   'JSON file to a single image dataset, and not to handle'
+                   'multiple JSON files to generate a real-use dataset.')
 
     parser = argparse.ArgumentParser()
     parser.add_argument('json_file')
@@ -52,7 +50,7 @@ def main():
         else:
             label_value = len(label_name_to_value)
             label_name_to_value[label_name] = label_value
-    lbl = utils.shapes_to_label(out_dir, img.shape, data['shapes'], label_name_to_value)
+    lbl = utils.shapes_to_label(out_dir,img.shape, data['shapes'], label_name_to_value)
 
     label_names = [None] * (max(label_name_to_value.values()) + 1)
     for name, value in label_name_to_value.items():

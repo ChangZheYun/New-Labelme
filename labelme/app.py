@@ -347,10 +347,10 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         self.zoomWidget.setEnabled(False)
 
-        zoomIn = action('Zoom &In', functools.partial(self.addZoom, 10),
+        zoomIn = action('Zoom &In', functools.partial(self.addZoom, 1.1),
                         shortcuts['zoom_in'], 'zoom-in',
                         'Increase zoom level', enabled=False)
-        zoomOut = action('&Zoom Out', functools.partial(self.addZoom, -10),
+        zoomOut = action('&Zoom Out', functools.partial(self.addZoom, 0.9),
                          shortcuts['zoom_out'], 'zoom-out',
                          'Decrease zoom level', enabled=False)
         zoomOrg = action('&Original size',
@@ -921,10 +921,10 @@ class MainWindow(QtWidgets.QMainWindow):
         item = self.labelList.get_item_from_shape(shape)
         self.labelList.takeItem(self.labelList.row(item))
 
-    def loadShapes(self, shapes):
+    def loadShapes(self, shapes, replace=True):
         for shape in shapes:
             self.addLabel(shape)
-        self.canvas.loadShapes(shapes)
+        self.canvas.loadShapes(shapes, replace=replace)
 
     def loadLabels(self, shapes):
         s = []
@@ -1035,7 +1035,15 @@ class MainWindow(QtWidgets.QMainWindow):
         if items:
             text = items[0].text()
         if self._config['display_label_popup'] or not text:
+            # instance label auto increment
+            if self._config['instance_label_auto_increment']:
+                previous_label = self.labelDialog.edit.text()
+                split = previous_label.split('-')
+                if len(split) > 1 and split[-1].isdigit():
+                    split[-1] = str(int(split[-1]) + 1)
+                    text = '-'.join(split)
             text = self.labelDialog.popUp(text)
+
         if text is not None and not self.validateLabel(text):
             self.errorMessage('Invalid label',
                               "Invalid label '{}' with validation type '{}'"
@@ -1062,13 +1070,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.zoomMode = self.MANUAL_ZOOM
         self.zoomWidget.setValue(value)
 
-    def addZoom(self, increment=10):
-        self.setZoom(self.zoomWidget.value() + increment)
+    def addZoom(self, increment=1.1):
+        self.setZoom(self.zoomWidget.value() * increment)
 
     def zoomRequest(self, delta, pos):
         canvas_width_old = self.canvas.width()
-
-        units = delta * 0.1
+        units = 1.1
+        if delta < 0:
+            units = 0.9
         self.addZoom(units)
 
         canvas_width_new = self.canvas.width()
@@ -1170,12 +1179,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.canvas.loadPixmap(QtGui.QPixmap.fromImage(image))
         if self._config['flags']:
             self.loadFlags({k: False for k in self._config['flags']})
-        if self._config['keep_prev']:
-            self.loadShapes(prev_shapes)
         if self.labelFile:
             self.loadLabels(self.labelFile.shapes)
             if self.labelFile.flags is not None:
                 self.loadFlags(self.labelFile.flags)
+        if self._config['keep_prev'] and not self.labelList.shapes:
+            self.loadShapes(prev_shapes, replace=False)
         self.setClean()
         self.canvas.setEnabled(True)
         self.adjustScale(initial=True)

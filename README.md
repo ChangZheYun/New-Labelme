@@ -2,14 +2,15 @@
 ===
 
 
-labelme版本：3.11.2
+labelme版本：3.14.1
 
 <br>
 
-版本：1.2
+版本：1.3
 
-1.更新路徑錯誤造成無法轉換。(存取json檔時請勿C槽與D槽間切換，那是原始labelme的程式錯誤)
-2.更新mask儲存名稱
+1.更新mask儲存方式(相同label存一張)
+
+(下版本更新不同label相同顏色問題)
 
 <br>
 
@@ -24,6 +25,6 @@ labelme版本：3.11.2
 1.請先安裝Anaconda並建立環境
 
 2.進入環境後安裝labelme(需為指定版本)
-> pip install labelme==3.11.2
+> pip install labelme==3.14.1
 
 3.進入``.\Anaconda\envs\LabelEnv\Lib\site-packages``內，覆蓋原有labelme檔案(LabelEnv為環境名稱)

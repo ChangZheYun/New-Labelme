@@ -4,12 +4,9 @@ import numpy as np
 import PIL.Image
 import PIL.ImageDraw
 
-import os.path as osp
-import os
-
 from labelme.logger import logger
 from labelme import utils
-
+import os
 
 def polygons_to_mask(img_shape, polygons, shape_type=None):
     logger.warning(
@@ -52,14 +49,23 @@ def shape_to_mask(img_shape, points, shape_type=None,
 
 def shapes_to_label(out_dir, img_shape, shapes, label_name_to_value, type='class'):
     assert type in ['class', 'instance']
-
+    
     cls = np.zeros(img_shape[:2], dtype=np.int32)
+    ###Create different label images###
+    ltable = []
+    limg = {}
+    ###
     if type == 'instance':
         ins = np.zeros(img_shape[:2], dtype=np.int32)
         instance_names = ['_background_']
     for shape in shapes:
         points = shape['points']
         label = shape['label']
+        ###new code###
+        if label not in ltable:
+            ltable.append(label)
+            limg[label]=np.zeros(img_shape[:2], dtype=np.int32)  ###insert label to dictionary###
+        ###
         shape_type = shape.get('shape_type', None)
         if type == 'class':
             cls_name = label
@@ -70,22 +76,18 @@ def shapes_to_label(out_dir, img_shape, shapes, label_name_to_value, type='class
             ins_id = instance_names.index(label)
         cls_id = label_name_to_value[cls_name]
         mask = shape_to_mask(img_shape[:2], points, shape_type)
-        
-        ###new code###
-        name=cls_name+'.png'
-        mask_path=os.path.join(out_dir,name)
-        new_mask=np.array(mask,dtype=np.int32)
-        for i in range(len(new_mask)):
-           for j in range(len(new_mask[0])):
-              if new_mask[i][j]!=0 :
-                 new_mask[i][j]=cls_id
-        utils.lblsave(mask_path, new_mask)
-        ###
-        
         cls[mask] = cls_id
+        limg[cls_name][mask] = cls_id
         if type == 'instance':
             ins[mask] = ins_id
 
+    ###new code###
+    for counts in limg:
+       name=counts+'.png'
+       mask_path=os.path.join(out_dir,name)
+       utils.lblsave(mask_path, limg[counts])
+    ###
+    
     if type == 'instance':
         return cls, ins
     return cls

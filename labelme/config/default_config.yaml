@@ -1,5 +1,6 @@
 auto_save: false
 display_label_popup: true
+instance_label_auto_increment: true
 store_data: true
 keep_prev: false
 logger_level: info
@@ -39,7 +40,7 @@ fit_to_content:
   column: true
   row: false
 
-epsilon: 11.0
+epsilon: 10.0
 
 shortcuts:
   close: Ctrl+W

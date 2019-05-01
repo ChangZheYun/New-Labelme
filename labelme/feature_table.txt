@@ -1,0 +1,6 @@
+0:_background_
+1:Leaf_0
+2:Leaf_1
+3:Disease_Undefined
+4:Disease_1
+5:Disease_2

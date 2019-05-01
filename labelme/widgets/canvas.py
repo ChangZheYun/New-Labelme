@@ -36,7 +36,7 @@ class Canvas(QtWidgets.QWidget):
     _fill_drawing = False
 
     def __init__(self, *args, **kwargs):
-        self.epsilon = kwargs.pop('epsilon', 11.0)
+        self.epsilon = kwargs.pop('epsilon', 10.0)
         super(Canvas, self).__init__(*args, **kwargs)
         # Initialise local state.
         self.mode = self.EDIT
@@ -231,8 +231,8 @@ class Canvas(QtWidgets.QWidget):
         for shape in reversed([s for s in self.shapes if self.isVisible(s)]):
             # Look for a nearby vertex to highlight. If that fails,
             # check if we happen to be inside a shape.
-            index = shape.nearestVertex(pos, self.epsilon)
-            index_edge = shape.nearestEdge(pos, self.epsilon)
+            index = shape.nearestVertex(pos, self.epsilon / self.scale)
+            index_edge = shape.nearestEdge(pos, self.epsilon / self.scale)
             if index is not None:
                 if self.selectedVertex():
                     self.hShape.highlightClear()
@@ -542,7 +542,8 @@ class Canvas(QtWidgets.QWidget):
         # d = distance(p1 - p2)
         # m = (p1-p2).manhattanLength()
         # print "d %.2f, m %d, %.2f" % (d, m, d - m)
-        return labelme.utils.distance(p1 - p2) < self.epsilon
+        # divide by scale to allow more precision when zoomed in
+        return labelme.utils.distance(p1 - p2) < (self.epsilon / self.scale)
 
     def intersectionPoint(self, p1, p2):
         # Cycle through each image edge in clockwise fashion,
@@ -677,8 +678,11 @@ class Canvas(QtWidgets.QWidget):
         self.shapes = []
         self.repaint()
 
-    def loadShapes(self, shapes):
-        self.shapes = list(shapes)
+    def loadShapes(self, shapes, replace=True):
+        if replace:
+            self.shapes = list(shapes)
+        else:
+            self.shapes.extend(shapes)
         self.storeShapes()
         self.current = None
         self.repaint()
